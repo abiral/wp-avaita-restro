@@ -1,5 +1,7 @@
 <?php
 require __DIR__  . '/order-metabox.php';
+require __DIR__ . '/admin-api.php';
+
 add_filter('avaita_admin_available_tabs', 'avaita_add_shipping_settings_tab', 10, 1);
 function avaita_add_shipping_settings_tab($tabs) {
     $tabs[] = array(

@@ -107,6 +107,31 @@ class Avaita_Local_Shipping_Database
             'data' => $response,
         );
     }
+
+    function add_delivery_data($payload) {
+        global $wpdb;
+
+       return $wpdb->insert($this->table, array(
+            'area' => sanitize_text_field($payload['area']),
+            'street' => isset($payload['street']) ? sanitize_text_field($payload['street']) : null,
+            'city' => sanitize_text_field($payload['city']),
+            'state' => sanitize_text_field($payload['state'] ?? 'LUM'),
+            'distance' => floatval($payload['distance']),
+            'minimum_order_threshold' => floatval($payload['minimum_order_threshold']),
+            'minimum_free_delivery' => floatval($payload['minimum_free_delivery']),
+            'delivery_price' => floatval($payload['delivery_price']),
+        ));
+    }
+
+    function update_delivery_data($id, $payload) {
+        global $wpdb;
+        return $wpdb->update($this->table, $payload, array('id' => $id));
+    }
+
+    function remove_delivery_data($id) {
+        global $wpdb;
+        return $wpdb->delete($this->table, array('id' => $id));
+    }
 }
 
 $avaita_local_shipping_db = new Avaita_Local_Shipping_Database();

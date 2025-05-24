@@ -1,9 +1,4 @@
 +(function ($) {
-    function getRandTime() {
-        const randTime = Math.floor(Math.random() * 5) + 1;
-        return randTime;
-    }
-
     function calculateDeliveryCharge(distance) {
         let delivery_charge = 0;
         let street_extra_price = 0;
@@ -77,54 +72,95 @@
         };
     }
 
-    function blockUI(){
-        tb_show('','#TB_inline?height=240&amp;width=405&amp;inlineId=avaita-loader&amp;modal=true',null);
+    function blockUI() {
+        tb_show('', '#TB_inline?height=240&amp;width=405&amp;inlineId=avaita-loader&amp;modal=true', null);
     }
 
-    function unBlockUI(){
+    function unBlockUI() {
         tb_remove();
     }
 
-    const avaita_ajax = {
-        /* Mock AJAX Operation */
-        add_location: function (params, cb) {
-            const randTime = getRandTime();
-            console.log(randTime);
-            setTimeout(function () {
-                if (randTime % 2 == 0) {
-                    console.log('Location added successfully', params);
-                    cb(true);
-                } else {
-                    console.error('Unable to add location', params);
-                    cb(false);
-                }
-            }, randTime);
+    function showAdminNotice(type, message) {
+        const html = `
+            <div class="notice notice-${type} is-dismissible">
+                <p>${message}</p>
+            </div>
+        `;
+        $('#avaita-admin-messages').html(html);
+    }
+
+
+    const notice = {
+        showSuccess: function (message) {
+            unBlockUI();
+            showAdminNotice('success', message);
         },
 
-        update_location: function (id, params, cb) {
-            const randTime = getRandTime();
-            setTimeout(function () {
-                if (randTime % 2 == 0) {
-                    console.log(`Location ${id} updated successfully`, params);
-                    cb(true);
-                } else {
-                    console.error(`Unable to update location ${id}`, params);
-                    cb(false);
-                }
-            }, randTime);
+        showError: function (xhr) {
+            unBlockUI();
+            const errorMsg = xhr.responseJSON?.message || 'Something went wrong.';
+            showAdminNotice('error', errorMsg);
         },
 
-        delete_location: function (id) {
-            const randTime = getRandTime();
-            setTimeout(function () {
-                if (randTime % 2 == 0) {
-                    console.log(`Location ${id} deleted successfully`);
-                    cb(true);
-                } else {
-                    console.log(`Unable to delete location ${id}`);
-                    cb(false);
-                }
-            }, randTime);
+        hide: function (cb = null) {
+            setTimeout(() => {
+                $('#avaita-admin-messages .notice').fadeOut();
+                if (cb) cb();
+            }, 2000);
+        }
+    }
+
+    const avaitaAjax = {
+        addLocation: function (params, cb) {
+            blockUI();
+            $.ajax({
+                url: AVAITA_DELIVERY_VARS.api_host + '/admin/delivery-address',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(params),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', AVAITA_DELIVERY_VARS.nonce);
+                },
+                success: function (response) {
+                    notice.showSuccess(response.message);
+                    cb(response);
+                },
+                error: notice.showError,
+            });
+        },
+
+        updateLocation: function (id, params, cb) {
+            blockUI();
+            $.ajax({
+                url: AVAITA_DELIVERY_VARS.api_host + '/admin/delivery-address/' + id,
+                method: 'PATCH',
+                contentType: 'application/json',
+                data: JSON.stringify(params),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', AVAITA_DELIVERY_VARS.nonce);
+                },
+                success: function (response) {
+                    notice.showSuccess(response.message);
+                    cb(response);
+                },
+                error: notice.showError,
+            });
+        },
+
+        deleteLocation: function (id, cb) {
+            blockUI();
+            $.ajax({
+                url: AVAITA_DELIVERY_VARS.api_host + '/admin/delivery-address/' + id,
+                method: 'DELETE',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', AVAITA_DELIVERY_VARS.nonce);
+                },
+                success: function (response) {
+                    notice.showSuccess(response.message);
+                    cb(response);
+                },
+                error: notice.showError,
+            });
         }
     };
 
@@ -164,19 +200,31 @@
     $('.save-data').on('click', function (event) {
         event.preventDefault();
         const parentEl = $(this).parents('tr');
-        /* TODO: Show loader, disable all the input buttons, and fields to prevent it from being clicked */
-        /* TODO: Collect all the parameter, and save it to a variable */
-        const payload = {};
-        const id = parentEl.find('input[name=id]').val();
+        blockUI();
+        const id = parentEl.find('input[name="id"]').val();
+        const payload = {
+            id: id,
+            area: parentEl.find('input[name="area"]').val(),
+            street: parentEl.find('input[name="street"]').val(),
+            city: parentEl.find('input[name="city"]').val(),
+            state: parentEl.find('input[name="state"]').val(),
+            distance: parentEl.find('input[name="distance"]').val(),
+            minimum_order_threshold: parentEl.find('input[name="minimum_order_threshold"]').val(),
+            minimum_free_delivery: parentEl.find('input[name="minimum_free_delivery"]').val(),
+            delivery_price: parentEl.find('input[name="delivery_price"]').val()
+        };
 
         const handleSubmission = function (response) {
-
+            unBlockUI();
+            setTimeout(function () {
+                location.reload();
+            }, 2000);
         };
 
         if (id) {
-            avaita_ajax.update_location(id, payload, handleSubmission);
+            avaitaAjax.updateLocation(id, payload, handleSubmission);
         } else {
-            avaita_ajax.add_location(payload, handleSubmission);
+            avaitaAjax.addLocation(payload, handleSubmission);
         }
     });
 
@@ -192,22 +240,22 @@
         $('input[name="minimum_order_threshold"]').val(parentEl.find('td.min-threshold').data('val'));
         $('input[name="minimum_free_delivery"]').val(parentEl.find('td.min-delivery').data('val'));
         $('input[name="delivery_price"]').val(parentEl.find('td.delivery-price').data('val'));
-        /* Eg: $('tr.input-area').find('input[name=id].val(parentEl.data('location-id')); */
     });
 
 
     $('.delete-location').on('click', function (event) {
         event.preventDefault();
         const parentEl = $(this).parents('tr');
-        if (!confirm(parentEl.data('remove-message'))){
+        if (!confirm(parentEl.data('remove-message'))) {
             return;
         }
 
-        // 
-
-
-        // setTimeout(function () {
-        //     
-        // }, 2000);
+        const id = parentEl.data('location-id');
+        avaitaAjax.deleteLocation(id, function () {
+            unBlockUI();
+            setTimeout(function () {
+                location.reload();
+            }, 2000);
+        });
     });
-}) (jQuery);
+})(jQuery);

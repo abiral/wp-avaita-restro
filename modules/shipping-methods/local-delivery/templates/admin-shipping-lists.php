@@ -30,12 +30,6 @@
         font-weight: bold;
     }
 
-    .avaita-search-form {
-        display: flex;
-        justify-content: right;
-        margin-bottom: 20px;
-    }
-
     .pagination ul {
         display: flex;
         width: 500px;
@@ -79,24 +73,30 @@ $page_url = admin_url() . '?' . http_build_query($query_args, '', '&');
 ?>
 
 <div>
-    <h2><?php _e('Delivery Areas', 'avaita-restro'); ?></h2>
+    <div id="avaita-admin-messages" style="margin-top: 20px"></div>
     <?php add_thickbox(); ?>
-        <div id="avaita-loader" class="avaita-loader" style="display:none;">
-            <div class="avaita-loader">
-                <span id="avaita-loader-inner"></span>
-            </div>
+    <div id="avaita-loader" class="avaita-loader" style="display:none;">
+        <div class="avaita-loader">
+            <span id="avaita-loader-inner"></span>
         </div>
+    </div>
     <div class="delivery-areas-list">
-        <div>
-            <form class="avaita-search-form">
-                <?php foreach($query_args as $key => $value): ?>
-                    <?php if ($key == 'search_query') continue; ?>
-                    <?php if ($key == 'page_number') $value = $page_number; ?>
-                    <input type="hidden" name="<?php echo $key; ?>" value="<?php echo $value; ?>" />
-                <?php endforeach; ?>
-                <input type="text" name="search_query" value="<?php echo $search_query; ?>" />
-                <button class="btn-search" type="submit">Search</button>
-            </form>
+        <div class="avaita-header">
+            <div>
+                <h2><?php _e('Delivery Areas', 'avaita-restro'); ?></h2>
+                <p><?php _e('Manage delivery areas and their respective shipping charges.', 'avaita-restro'); ?></p>
+            </div>
+            <div>
+                <form class="avaita-search-form">
+                    <?php foreach($query_args as $key => $value): ?>
+                        <?php if ($key == 'search_query') continue; ?>
+                        <?php if ($key == 'page_number') $value = $page_number; ?>
+                        <input type="hidden" name="<?php echo $key; ?>" value="<?php echo $value; ?>" />
+                    <?php endforeach; ?>
+                    <input type="text" name="search_query" value="<?php echo $search_query; ?>" />
+                    <button class="btn-search" type="submit">Search</button>
+                </form>
+            </div>
         </div>
         <table class="table">
             <thead>

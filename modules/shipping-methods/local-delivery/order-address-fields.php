@@ -40,7 +40,8 @@ function avaita_load_admin_order_scripts()
     
     $localized_vars = array(
         'ajax_url' => admin_url( 'admin-ajax.php' ),
-        'api_host' => get_rest_url() . AVAITA_API_NAMESPACE
+        'api_host' => get_rest_url() . AVAITA_API_NAMESPACE,
+        'nonce' => wp_create_nonce('wp_rest'),
     );
 
     wp_localize_script('avaita-local-delivery-orders', 'AVAITA_DELIVERY_VARS', $localized_vars);

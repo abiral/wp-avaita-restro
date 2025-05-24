@@ -1,0 +1,133 @@
+/* .avaita-autocomplete .aa-Autocomplete *, 
+.avaita-autocomplete .aa-DetachedFormContainer *,
+.avaita-autocomplete .aa-Panel * {
+    box-sizing: border-box;
+}
+
+.avaita-autocomplete button.aa-SubmitButton {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: none;
+    margin: 0;
+    border: 0;
+    padding-left: calc((16* 1* 1px)* 0.75 - 1px);
+    padding-left: calc(calc(16* 1* 1px)* 0.75 - 1px);
+    padding-left: calc(var(--aa-spacing)* 0.75 - 1px);
+    padding-right: calc((16* 1* 1px) / 2);
+    padding-right: calc(calc(16* 1* 1px) / 2);
+    padding-right: var(--aa-spacing-half);
+    width: calc((16* 1* 1px)* 1.75 + 20px - 1px);
+    width: calc(calc(16* 1* 1px)* 1.75 + 20px - 1px);
+}
+
+
+.avaita-autocomplete button.aa-ClearButton {
+    align-items: center;
+    background: none;
+    border: 0;
+    color: rgba(128, 126, 163, 0.6);
+    color: rgba(var(--aa-muted-color-rgb), var(--aa-muted-color-alpha));
+    cursor: pointer;
+    display: flex;
+    height: 100%;
+    margin: 0;
+    padding: 0 calc((16* 1* 1px)* 0.83333 - .5px);
+    padding: 0 calc(calc(16* 1* 1px)* 0.83333 - .5px);
+    padding: 0 calc(var(--aa-spacing)* 0.83333 - .5px);
+}
+
+
+.avaita-autocomplete .aa-Input{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: none;
+    border: 0;
+    color: rgba(38, 38, 39, 1);
+    color: rgba(var(--aa-text-color-rgb), var(--aa-text-color-alpha));
+    font: inherit;
+    height: 44px;
+    height: var(--aa-search-input-height);
+    padding: 0;
+    width: 100%;
+}
+
+
+.avaita-autocomplete label {
+    display: inherit;
+    margin-bottom: initial;
+    color: inherit;
+    vertical-align: inherit;
+    font-weight: inherit;
+}
+
+.avaita-autocomplete label.aa-Label[hidden] {
+    display: none;
+} */
+
+.form-row.address-field {
+    display: none !important;
+}
+
+
+.avaita-address-finder-wrapper.loading .spinner {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: absolute;
+    animation: avaita-address-finder-rotate 1s linear infinite;
+    top: 32px;
+    right: 5px;
+}
+.avaita-address-finder-wrapper.loading .spinner::before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    inset: 0px;
+    border-radius: 50%;
+    border: 2px solid #afa0a0;
+    animation: avaita-address-finder-rotate-animation 2s linear infinite ;
+}
+
+@keyframes avaita-address-finder-rotate {
+    100%   {transform: rotate(360deg)}
+}
+
+@keyframes avaita-address-finder-rotate-animation {
+    0%   {clip-path:polygon(50% 50%,0 0,0 0,0 0,0 0,0 0)}
+    25%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 0,100% 0,100% 0)}
+    50%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,100% 100%,100% 100%)}
+    75%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 100%)}
+    100% {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 0)}
+}
+
+
+.avaita-address-finder-wrapper.loading {
+    position: relative;
+}
+
+.avaita-address-finder-wrapper.loading .woocommerce-input-wrapper {
+    position: relative;
+}
+
+.avaita-address-finder-wrapper.loading .woocommerce-input-wrapper::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.5);
+    top: 0;
+    left: 5px;
+    width: 200px;
+    height: 20px;
+    display: block;
+}
+
+.woocommerce-info.avaita-offer-notice {
+    background-color: #fff;
+    color: #e92128;
+    border: 2px dashed #e92128;
+}
+
+.woocommerce-info.avaita-offer-notice span {
+    color: #e92128;
+}

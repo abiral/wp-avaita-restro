@@ -1,0 +1,7 @@
+<div>
+    <ul class="subsubsub">
+        <li><a href="<?php echo $tabs[$active_tab]['url'] . '&section=khalti'; ?>" >Khalti Gateway</a> | </li>
+        <li><a href="<?php echo $tabs[$active_tab]['url'] . '&section=khalti-qr'; ?>" >Khalti QR Gateway</a></li>
+    </ul> 
+    <br class="clear">
+</div>

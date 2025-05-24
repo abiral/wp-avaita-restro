@@ -1,0 +1,165 @@
+<style>
+    .table>thead {
+        vertical-align: bottom;
+    }
+
+    tbody, td, tfoot, th, thead, tr {
+        border-color: inherit;
+        border-style: solid;
+        border-width: 0;
+        text-align: center;
+    }
+
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        vertical-align: top;
+        border-color: #b2b2b2;
+        caption-side: bottom;
+        border-collapse: collapse;
+    }
+
+    .table>:not(caption)>*>* {
+        padding: .5rem .5rem;
+        color: #000;
+        background-color: transparent;
+        border-bottom-width: 1px;
+    }
+
+    .table th {
+        font-weight: bold;
+    }
+
+    .avaita-search-form {
+        display: flex;
+        justify-content: right;
+        margin-bottom: 20px;
+    }
+
+    .pagination ul {
+        display: flex;
+        width: 500px;
+        margin: 0 auto;
+        justify-content: center;
+    }
+
+    .pagination ul li {
+        margin-left: 20px;
+        text-align: center;
+        height: 20px;
+        width: 20px;
+    }
+
+    .pagination ul li.active {
+        background: #6d695f;
+        color: #fff;
+    }
+</style>
+
+<?php
+global $avaita_local_shipping_db;
+$page_number = isset($_GET['page_number']) && $_GET['page_number'] ? $_GET['page_number']: 1;
+$page = isset($_GET['page']) && $_GET['page'] ? $_GET['page']: 'ava-restro';
+$search_query = isset($_GET['search_query']) ? $_GET['search_query'] : '' ;
+$query_args = array();
+
+$delivery_data = $avaita_local_shipping_db->get_delivery_data($search_query, $page_number);
+
+if ($page) {
+    $query_args['page'] = $page;
+}
+
+if ($search_query) {
+    $query_args['search_query'] = $search_query;
+}
+
+$query_args['page_number'] = 'pagePlaceholder';
+
+$page_url = admin_url() . '?' . http_build_query($query_args, '', '&');
+?>
+
+<div>
+    <h2><?php _e('Delivery Areas', 'avaita-restro'); ?></h2>
+    
+    <div class="delivery-areas-list">
+        <div>
+            <form class="avaita-search-form">
+                <?php foreach($query_args as $key => $value): ?>
+                    <?php if ($key == 'search_query') continue; ?>
+                    <?php if ($key == 'page_number') $value = $page_number; ?>
+                    <input type="hidden" name="<?php echo $key; ?>" value="<?php echo $value; ?>" />
+                <?php endforeach; ?>
+                <input type="text" name="search_query" value="<?php echo $search_query; ?>" />
+                <button class="btn-search" type="submit">Search</button>
+            </form>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><?php _e('Area', 'avaita-restro'); ?></th>
+                    <th><?php _e('Street', 'avaita-restro'); ?></th>
+                    <th><?php _e('City', 'avaita-restro'); ?></th>
+                    <th><?php _e('state', 'avaita-restro'); ?></th>
+                    <th><?php _e('Distance', 'avaita-restro'); ?></th>
+                    <th><?php _e('Order Threshold', 'avaita-restro'); ?></th>
+                    <th><?php _e('Free Threshold', 'avaita-restro'); ?></th>
+                    <th><?php _e('Delivery Price', 'avaita-restro'); ?></th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr class="input-area">
+                    <td><input type="text" name="area" /></td>
+                    <td><input type="text" name="street" /></td>
+                    <td><input type="text" name="city" /></td>
+                    <td>LUM <input type="hidden" name="state" value="LUM" /></td>
+                    <td><input type="number" name="distance" /></td>
+                    <td><input type="number" name="minimum_order_threshold" /></td>
+                    <td><input type="number" name="minimum_free_delivery" /></td>
+                    <td><input type="number" name="delivery_price"" /></td>
+                    <td>
+                        <input type="hidden" name="id" value="" />
+                        <button  class="save-data" disabled><i class="dashicons dashicons-plus-alt2"></i></button>
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if($delivery_data && $delivery_data['total']): ?>
+                    <?php foreach($delivery_data['data'] as $data): ?>
+                        <tr  data-location-id="<?php echo $data->id; ?>">
+                            <td><?php echo $data->area; ?></td>
+                            <td><?php echo $data->street; ?></td>
+                            <td><?php echo $data->city; ?></td>
+                            <td><?php echo $data->state; ?></td>
+                            <td><?php echo $data->distance ? $data->distance . ' km' : 'N/A'; ?></td>
+                            <td><?php echo $data->minimum_order_threshold ? wc_price($data->minimum_order_threshold) : 0; ?></td>
+                            <td><?php echo $data->minimum_free_delivery ? wc_price($data->minimum_free_delivery) : 0; ?></td>
+                            <td><?php echo $data->delivery_price ? wc_price($data->delivery_price) : 0; ?></td>
+                            <td><button class="edit-location"><i class="dashicons dashicons-edit"></i></button> <button class="delete-location"><i class="dashicons dashicons-remove"></i></button></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                
+            </tbody>
+        </table>
+
+        <?php if($delivery_data && $delivery_data['total'] && $delivery_data['total'] > $delivery_data['per_page']): ?>
+            <?php
+                $current_page = $delivery_data['page'];
+                $pages = ceil($delivery_data['total'] / $delivery_data['per_page']);   
+            ?>
+
+            <?php if ($pages > 1): ?>
+                <div class="pagination">
+                    <ul>
+                        <?php for($i=1; $i<=$pages; $i++): ?>
+                            <?php if($i == $current_page): ?>
+                                <li class="active"><?php echo $i; ?></li>
+                            <?php else: ?>
+                                <li><a href="<?php echo str_replace('pagePlaceholder', $i, $page_url); ?>"><?php echo $i; ?></a></li>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>

@@ -80,7 +80,12 @@ $page_url = admin_url() . '?' . http_build_query($query_args, '', '&');
 
 <div>
     <h2><?php _e('Delivery Areas', 'avaita-restro'); ?></h2>
-    
+    <?php add_thickbox(); ?>
+        <div id="avaita-loader" class="avaita-loader" style="display:none;">
+            <div class="avaita-loader">
+                <span id="avaita-loader-inner"></span>
+            </div>
+        </div>
     <div class="delivery-areas-list">
         <div>
             <form class="avaita-search-form">
@@ -124,15 +129,15 @@ $page_url = admin_url() . '?' . http_build_query($query_args, '', '&');
             <tbody>
                 <?php if($delivery_data && $delivery_data['total']): ?>
                     <?php foreach($delivery_data['data'] as $data): ?>
-                        <tr  data-location-id="<?php echo $data->id; ?>">
-                            <td><?php echo $data->area; ?></td>
-                            <td><?php echo $data->street; ?></td>
-                            <td><?php echo $data->city; ?></td>
-                            <td><?php echo $data->state; ?></td>
-                            <td><?php echo $data->distance ? $data->distance . ' km' : 'N/A'; ?></td>
-                            <td><?php echo $data->minimum_order_threshold ? wc_price($data->minimum_order_threshold) : 0; ?></td>
-                            <td><?php echo $data->minimum_free_delivery ? wc_price($data->minimum_free_delivery) : 0; ?></td>
-                            <td><?php echo $data->delivery_price ? wc_price($data->delivery_price) : 0; ?></td>
+                        <tr data-location-id="<?php echo $data->id; ?>" data-remove-message="<?php echo sprintf(__('You are about to delete delivery data for %s area', 'avaita-restro'), $data->area); ?>">
+                            <td class="area" data-val="<?php echo $data->area; ?>"><?php echo $data->area; ?></td>
+                            <td class="street" data-val="<?php echo $data->street; ?>"><?php echo $data->street; ?></td>
+                            <td class="city" data-val="<?php echo $data->city; ?>"><?php echo $data->city; ?></td>
+                            <td class="state" data-val="<?php echo $data->state; ?>"><?php echo $data->state; ?></td>
+                            <td class="distance" data-val="<?php echo $data->distance; ?>" ><?php echo $data->distance ? $data->distance . ' km' : 'N/A'; ?></td>
+                            <td class="min-threshold" data-val="<?php echo $data->minimum_order_threshold; ?>" ><?php echo $data->minimum_order_threshold ? wc_price($data->minimum_order_threshold) : 0; ?></td>
+                            <td class="min-delivery" data-val="<?php echo $data->minimum_free_delivery; ?>"><?php echo $data->minimum_free_delivery ? wc_price($data->minimum_free_delivery) : 0; ?></td>
+                            <td class="delivery-price" data-val="<?php echo $data->delivery_price; ?>"><?php echo $data->delivery_price ? wc_price($data->delivery_price) : 0; ?></td>
                             <td><button class="edit-location"><i class="dashicons dashicons-edit"></i></button> <button class="delete-location"><i class="dashicons dashicons-remove"></i></button></td>
                         </tr>
                     <?php endforeach; ?>

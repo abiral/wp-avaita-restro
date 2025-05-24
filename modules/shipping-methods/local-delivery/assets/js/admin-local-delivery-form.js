@@ -77,6 +77,14 @@
         };
     }
 
+    function blockUI(){
+        tb_show('','#TB_inline?height=240&amp;width=405&amp;inlineId=avaita-loader&amp;modal=true',null);
+    }
+
+    function unBlockUI(){
+        tb_remove();
+    }
+
     const avaita_ajax = {
         /* Mock AJAX Operation */
         add_location: function (params, cb) {
@@ -175,7 +183,15 @@
     $('.edit-location').on('click', function (event) {
         event.preventDefault();
         const parentEl = $(this).parents('tr');
-        /* TODO: Get the values in row, and add it to the inputs in the form */
+        $('input[name="id"]').val(parentEl.data('location-id'));
+        $('input[name="area"]').val(parentEl.find('td.area').data('val'));
+        $('input[name="street"]').val(parentEl.find('td.street').data('val'));
+        $('input[name="city"]').val(parentEl.find('td.city').data('val'));
+        $('input[name="state"]').val(parentEl.find('td.state').data('val'));
+        $('input[name="distance"]').val(parentEl.find('td.distance').data('val'));
+        $('input[name="minimum_order_threshold"]').val(parentEl.find('td.min-threshold').data('val'));
+        $('input[name="minimum_free_delivery"]').val(parentEl.find('td.min-delivery').data('val'));
+        $('input[name="delivery_price"]').val(parentEl.find('td.delivery-price').data('val'));
         /* Eg: $('tr.input-area').find('input[name=id].val(parentEl.data('location-id')); */
     });
 
@@ -183,6 +199,15 @@
     $('.delete-location').on('click', function (event) {
         event.preventDefault();
         const parentEl = $(this).parents('tr');
-        /* TODO: Get the id from row and call delete_location from avaita_ajax*/
+        if (!confirm(parentEl.data('remove-message'))){
+            return;
+        }
+
+        // 
+
+
+        // setTimeout(function () {
+        //     
+        // }, 2000);
     });
 }) (jQuery);

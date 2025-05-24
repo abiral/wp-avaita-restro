@@ -17,7 +17,7 @@ function avaita_register_shipping_method($methods)
     return $methods;
 }
 
-// add_action('admin_enqueue_scripts', 'avaita_local_shipping_admin_scripts');
+add_action('admin_enqueue_scripts', 'avaita_local_shipping_admin_scripts');
 function avaita_local_shipping_admin_scripts()
 {
     if (!(is_admin() && isset($_GET['page']) && $_GET['page'] === 'ava-restro')) {
@@ -25,11 +25,12 @@ function avaita_local_shipping_admin_scripts()
     }
 
     if ($_GET['page'] === 'ava-restro' || $_GET['tab'] === 'local-shipping') {
-        wp_enqueue_script('avaita-local-shipping-admin', plugins_url('assets/js/admin.js', __FILE__), array('jquery'), '1.0.0', true);
-        wp_localize_script('avaita-local-shipping-admin', 'avaitaLocalShipping', array(
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('order-item')
-        ));
+        // wp_enqueue_script('avaita-local-shipping-admin', plugins_url('assets/js/admin.js', __FILE__), array('jquery'), '1.0.0', true);
+        // wp_localize_script('avaita-local-shipping-admin', 'avaitaLocalShipping', array(
+        //     'ajaxUrl' => admin_url('admin-ajax.php'),
+        //     'nonce' => wp_create_nonce('order-item')
+        // ));
+        wp_enqueue_style('avaita-local-shipping-admin', plugins_url('assets/css/admin-local-delivery.css', __FILE__), array(), '1.0.0');
     }
 }
 

@@ -1,4 +1,20 @@
 +(function ($) {
+    let queuePayload = [];
+    let proceededRecords = 0;
+    let syncing = false;
+    let locked = false;
+    const messageLists = $('#messageData').data('messages');
+
+    /* Check to see if there any new payload to be synced */
+    setInterval( () => {
+        if (!(!locked && queuePayload.length > 0)) {
+            return;
+        }
+        sync();
+    }, 10000);
+
+    
+
     function calculateDeliveryCharge(distance) {
         let delivery_charge = 0;
         let street_extra_price = 0;
@@ -72,6 +88,17 @@
         };
     }
 
+    function syncNotice() {
+        const queueLength = queuePayload.length;
+        $('.syncing-queue .sync-number').html(queueLength);
+        $('.syncing-synced .sync-number').html(proceededRecords);
+        if (syncing) {
+            $('.syncing-notice').removeClass('d-none').addClass('d-inline');
+        } else {
+            $('.syncing-notice').removeClass('d-inline').addClass('d-none');
+        }
+    } 
+
     function blockUI() {
         tb_show('', '#TB_inline?height=240&amp;width=405&amp;inlineId=avaita-loader&amp;modal=true', null);
     }
@@ -110,9 +137,30 @@
         }
     }
 
+
+    function sync () {
+        locked = true;
+        const processingPayload = [...queuePayload];
+        queuePayload = [];
+        syncing = true;
+        syncNotice();
+
+        const handleSubmission = function () {
+            proceededRecords += processingPayload.length;
+            syncing = false;
+            syncNotice();
+            locked = false;
+
+            if (proceededRecords > 0) {
+                notice.showSuccess(messageLists.saved_refresh_to_see.replace('{{number}}', proceededRecords));
+            }
+        };
+        
+        avaitaAjax.addLocation(processingPayload, handleSubmission);
+    };
+
     const avaitaAjax = {
         addLocation: function (params, cb) {
-            blockUI();
             $.ajax({
                 url: AVAITA_DELIVERY_VARS.api_host + '/admin/delivery-address',
                 method: 'POST',
@@ -197,13 +245,12 @@
         });
     });
 
+
     $('.save-data').on('click', function (event) {
         event.preventDefault();
         const parentEl = $(this).parents('tr');
-        blockUI();
         const id = parentEl.find('input[name="id"]').val();
         const payload = {
-            id: id,
             area: parentEl.find('input[name="area"]').val(),
             street: parentEl.find('input[name="street"]').val(),
             city: parentEl.find('input[name="city"]').val(),
@@ -214,19 +261,36 @@
             delivery_price: parentEl.find('input[name="delivery_price"]').val()
         };
 
-        const handleSubmission = function (response) {
+        if (id) {
+            payload['id'] = id;
+        }
+
+        const handleSubmission = function () {
             unBlockUI();
-            setTimeout(function () {
-                location.reload();
-            }, 2000);
         };
 
+        $('.form-input').val('');
+        $('.form-input:first').focus();
+
         if (id) {
-            avaitaAjax.updateLocation(id, payload, handleSubmission);
+            avaitaAjax.updateLocation(id, queuePayload, handleSubmission);
         } else {
-            avaitaAjax.addLocation(payload, handleSubmission);
+            locked = true;
+            queuePayload.push(payload);
+            syncNotice();
+            locked = false;
+        } 
+               
+    });
+
+    $('.form-input').keypress(function (e) {
+        var key = e.which;
+        if(key == 13){
+            $('.save-data').trigger('click');
+            return false;  
         }
     });
+    
 
     $('.edit-location').on('click', function (event) {
         event.preventDefault();

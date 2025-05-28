@@ -70,9 +70,15 @@ if ($search_query) {
 $query_args['page_number'] = 'pagePlaceholder';
 
 $page_url = admin_url() . '?' . http_build_query($query_args, '', '&');
+
+$js_messages = array(
+    'saved_refresh_to_see' => __('{{number}} data saved. Refresh to view saved data'),
+);
+
 ?>
 
 <div>
+    <div id="messageData" data-messages="<?php echo esc_html(json_encode($js_messages)); ?>"></div>
     <div id="avaita-admin-messages" style="margin-top: 20px"></div>
     <?php add_thickbox(); ?>
     <div id="avaita-loader" class="avaita-loader" style="display:none;">
@@ -83,7 +89,14 @@ $page_url = admin_url() . '?' . http_build_query($query_args, '', '&');
     <div class="delivery-areas-list">
         <div class="avaita-header">
             <div>
-                <h2><?php _e('Delivery Areas', 'avaita-restro'); ?></h2>
+                <div>
+                    <h2 class="d-inline"><?php _e('Delivery Areas', 'avaita-restro'); ?></h2>
+                    <div class="syncing-block d-inline">
+                        <div class="sync-item syncing-notice d-none"><?php _e('Syncing', 'avaita'); ?></div>
+                        <div class="sync-item syncing-synced d-inline"><span class="sync-number">0</span> <?php _e('records synced', 'avaita'); ?></div>
+                        <div class="sync-item syncing-queue d-inline"><span class="sync-number">0</span> <?php _e('in queue', 'avaita'); ?></div>
+                    </div>
+                </div>
                 <p><?php _e('Manage delivery areas and their respective shipping charges.', 'avaita-restro'); ?></p>
             </div>
             <div>
@@ -112,14 +125,14 @@ $page_url = admin_url() . '?' . http_build_query($query_args, '', '&');
                     <td>&nbsp;</td>
                 </tr>
                 <tr class="input-area">
-                    <td><input type="text" name="area" /></td>
-                    <td><input type="text" name="street" /></td>
-                    <td><input type="text" name="city" /></td>
+                    <td><input class="form-input" type="text" name="area" /></td>
+                    <td><input class="form-input" type="text" name="street" /></td>
+                    <td><input class="form-input" type="text" name="city" /></td>
                     <td>LUM <input type="hidden" name="state" value="LUM" /></td>
-                    <td><input type="number" name="distance" /></td>
-                    <td><input type="number" name="minimum_order_threshold" /></td>
-                    <td><input type="number" name="minimum_free_delivery" /></td>
-                    <td><input type="number" name="delivery_price"" /></td>
+                    <td><input class="form-input" type="number" name="distance" /></td>
+                    <td><input class="form-input" type="number" name="minimum_order_threshold" /></td>
+                    <td><input class="form-input" type="number" name="minimum_free_delivery" /></td>
+                    <td><input class="form-input" type="number" name="delivery_price"" /></td>
                     <td>
                         <input type="hidden" name="id" value="" />
                         <button  class="save-data" disabled><i class="dashicons dashicons-plus-alt2"></i></button>

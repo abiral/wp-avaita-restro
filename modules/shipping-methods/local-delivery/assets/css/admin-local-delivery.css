@@ -1,3 +1,11 @@
+.d-inline {
+	display: inline;
+}
+
+.d-none{
+	display: none;
+}
+
 .avaita-loader {
 	display: flex;
 	justify-content: center;
@@ -48,4 +56,15 @@
 	justify-content: space-between;
 	margin-bottom: 20px;
 	align-items: center;
+}
+
+.syncing-block .sync-item {
+    background: #dfdfe7;
+    border: 1px solid #dfdfe7;
+    padding: 2px 5px;
+    border-radius: 5px;
+}
+
+button {
+	cursor: pointer;
 }

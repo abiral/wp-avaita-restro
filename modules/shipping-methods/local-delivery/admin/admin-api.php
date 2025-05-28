@@ -39,13 +39,13 @@ class Avaita_Admin_Local_Shipping_API    {
         global $avaita_local_shipping_db, $wpdb;
 
         $params = $request->get_json_params();
-        $result = $avaita_local_shipping_db->add_delivery_data($params);
+        $results = $avaita_local_shipping_db->bulk_add_delivery_data($params);
 
-        if ($result === false) {
-            return new WP_Error('insert_failed', __('Failed to insert delivery address', 'avaita'), array('status' => 500));
+        if ($results === false) {
+            return new WP_Error('insert_failed', __('Failed to insert delivery addresses', 'avaita'), array('status' => 500));
         }
 
-        return rest_ensure_response(array('message' => __('Address added successfully', 'avaita'), 'id' => $wpdb->insert_id));
+        return rest_ensure_response(array('message' => __('Addresses added successfully', 'avaita'), 'ids' => $results));
     }
 
     public function update_delivery_address($request) {

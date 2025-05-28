@@ -123,6 +123,28 @@ class Avaita_Local_Shipping_Database
         ));
     }
 
+    function bulk_add_delivery_data($payloads) {
+        global $wpdb;
+        $results = [];
+
+        foreach ($payloads as $payload) {
+            $result = $wpdb->insert($this->table, array(
+                'area' => sanitize_text_field($payload['area']),
+                'street' => isset($payload['street']) ? sanitize_text_field($payload['street']) : null,
+                'city' => sanitize_text_field($payload['city']),
+                'state' => sanitize_text_field($payload['state'] ?? 'LUM'),
+                'distance' => floatval($payload['distance']),
+                'minimum_order_threshold' => floatval($payload['minimum_order_threshold']),
+                'minimum_free_delivery' => floatval($payload['minimum_free_delivery']),
+                'delivery_price' => floatval($payload['delivery_price']),
+            ));
+            
+            $results[] = $wpdb->insert_id;
+        }
+
+        return $results;
+    }
+
     function update_delivery_data($id, $payload) {
         global $wpdb;
         return $wpdb->update($this->table, $payload, array('id' => $id));

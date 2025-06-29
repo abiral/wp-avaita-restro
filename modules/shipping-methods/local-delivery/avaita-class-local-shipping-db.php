@@ -20,9 +20,10 @@ class Avaita_Local_Shipping_Database
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS " . $this->table . " (
+       $sql = "CREATE TABLE IF NOT EXISTS " . $this->table . " (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             area varchar(255) NOT NULL,
+            subarea varchar(255) NOT NULL, 
             street varchar(255) DEFAULT NULL,
             city varchar(255) NOT NULL,
             state varchar(3) DEFAULT 'LUM',
@@ -31,8 +32,9 @@ class Avaita_Local_Shipping_Database
             minimum_free_delivery float NOT NULL,
             delivery_price float NOT NULL,
             PRIMARY KEY (id),
-            FULLTEXT(area, street, city)
+            FULLTEXT(area, subarea, street, city) 
         ) " . $charset_collate . ";";
+
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
@@ -112,9 +114,10 @@ class Avaita_Local_Shipping_Database
         global $wpdb;
 
        return $wpdb->insert($this->table, array(
-            'area' => sanitize_text_field($payload['area']),
-            'street' => isset($payload['street']) ? sanitize_text_field($payload['street']) : null,
             'city' => sanitize_text_field($payload['city']),
+            'area' => sanitize_text_field($payload['area']),
+            'subarea' => sanitize_text_field($payload['subarea']), 
+            'street' => isset($payload['street']) ? sanitize_text_field($payload['street']) : null,
             'state' => sanitize_text_field($payload['state'] ?? 'LUM'),
             'distance' => floatval($payload['distance']),
             'minimum_order_threshold' => floatval($payload['minimum_order_threshold']),
@@ -129,9 +132,10 @@ class Avaita_Local_Shipping_Database
 
         foreach ($payloads as $payload) {
             $result = $wpdb->insert($this->table, array(
-                'area' => sanitize_text_field($payload['area']),
-                'street' => isset($payload['street']) ? sanitize_text_field($payload['street']) : null,
                 'city' => sanitize_text_field($payload['city']),
+                'area' => sanitize_text_field($payload['area']),
+                'subarea' => sanitize_text_field($payload['subarea']),
+                'street' => isset($payload['street']) ? sanitize_text_field($payload['street']) : null,
                 'state' => sanitize_text_field($payload['state'] ?? 'LUM'),
                 'distance' => floatval($payload['distance']),
                 'minimum_order_threshold' => floatval($payload['minimum_order_threshold']),

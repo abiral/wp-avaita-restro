@@ -36,6 +36,7 @@ class Avaita_Admin_Local_Shipping_API    {
     }
 
     public function add_delivery_address($request) {
+        // dd($request);
         global $avaita_local_shipping_db, $wpdb;
 
         $params = $request->get_json_params();
@@ -55,7 +56,7 @@ class Avaita_Admin_Local_Shipping_API    {
         $params = $request->get_json_params();
         $fields = array();
 
-        $allowed_fields = ['area', 'street', 'city', 'state', 'distance', 'minimum_order_threshold', 'minimum_free_delivery', 'delivery_price'];
+        $allowed_fields = ['city','area', 'subarea', 'street', 'state', 'distance', 'minimum_order_threshold', 'minimum_free_delivery', 'delivery_price'];
 
         foreach ($allowed_fields as $field) {
             if (isset($params[$field])) {

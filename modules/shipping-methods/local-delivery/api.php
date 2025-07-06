@@ -8,9 +8,14 @@ function avaita_register_local_delivery_endpoints()
         'callback' => 'avaita_get_available_areas',
     ));
 
-    register_rest_route(AVAITA_API_NAMESPACE, '/delivery-addresses/area-details', array(
+     register_rest_route(AVAITA_API_NAMESPACE, '/delivery-addresses/subareas', array(
         'methods' => WP_REST_Server::READABLE,
-        'callback' => 'avaita_get_available_area_details',
+        'callback' => 'avaita_get_available_subareas',
+    ));
+
+    register_rest_route(AVAITA_API_NAMESPACE, '/delivery-addresses/shipping-info', array(
+        'methods' => WP_REST_Server::READABLE,
+        'callback' => 'avaita_get_shipping_details',
     ));
 }
 
@@ -21,7 +26,21 @@ function avaita_get_available_areas($request)
     $query_params = $request->get_query_params();
     $response = $avaita_local_shipping_db->get_all_areas($query_params['city']);
 
-    if (count($response) == 0) {
+    if (!($response && count($response) > 0)) {
+        return new WP_REST_Response([], 404);
+    }
+
+    return new WP_REST_Response($response, 200);
+}
+
+function avaita_get_available_subareas($request)
+{
+    global $avaita_local_shipping_db;
+
+    $query_params = $request->get_query_params();
+    $response = $avaita_local_shipping_db->get_all_subareas($query_params['city'], $query_params['area']);
+    
+    if (!($response && count($response) > 0)) {
         return new WP_REST_Response([], 404);
     }
 
@@ -29,12 +48,12 @@ function avaita_get_available_areas($request)
 }
 
 
-function avaita_get_available_area_details($request)
+function avaita_get_shipping_details($request)
 {
     global $avaita_local_shipping_db;
 
     $query_params = $request->get_query_params();
-    $response = $avaita_local_shipping_db->get_shipping_charge_for_area($query_params['city'], $query_params['area']);
+    $response = $avaita_local_shipping_db->get_shipping_charge_for_subarea($query_params['city'], $query_params['area'], $query_params['subarea']);
 
     if (!$response) {
         return new WP_REST_Response(null, 404);

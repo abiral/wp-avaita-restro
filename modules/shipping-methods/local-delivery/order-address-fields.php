@@ -36,7 +36,7 @@ function avaita_load_admin_order_scripts()
 {
     wp_enqueue_script('avaita-local-delivery-select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', array('jquery'), '4.1.0-rc.0', null);
     wp_enqueue_style('avaita-local-delivery-select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', array(), '4.1.0-rc.0');
-    wp_enqueue_script('avaita-local-delivery-orders', AVAITA_RESTRO_URL . '/modules/shipping-methods/local-delivery/assets/js/admin-local-delivery.js', array('jquery', 'wc-admin-order-meta-boxes'), null, true);   
+    wp_enqueue_script('avaita-local-delivery-orders', AVAITA_RESTRO_URL . '/modules/shipping-methods/local-delivery/assets/js/admin-local-delivery.js', array('jquery', 'wc-admin-order-meta-boxes'), AVAITA_RESTRO_VERSION, true);   
     
     $localized_vars = array(
         'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -47,7 +47,7 @@ function avaita_load_admin_order_scripts()
     wp_localize_script('avaita-local-delivery-orders', 'AVAITA_DELIVERY_VARS', $localized_vars);
 
     if ($_GET['page'] && $_GET['page'] == 'ava-restro') {
-        wp_enqueue_script('avaita-local-delivery-form', AVAITA_RESTRO_URL . '/modules/shipping-methods/local-delivery/assets/js/admin-local-delivery-form.js', array('jquery'), null, true );
+        wp_enqueue_script('avaita-local-delivery-form', AVAITA_RESTRO_URL . '/modules/shipping-methods/local-delivery/assets/js/admin-local-delivery-form.js', array('jquery'), AVAITA_RESTRO_VERSION, true );
         wp_localize_script('avaita-local-delivery-form', 'AVAITA_DELIVERY_VARS', $localized_vars);
     }
 }
@@ -99,7 +99,11 @@ function avaita_add_billing_fields($fields)
     }
 
     $areas = array(
-        '' => 'Select the city first'
+        '' => __('Select the city first', 'avaita')
+    );
+
+    $subareas = array(
+        '' => __('Select the area first', 'avaita')
     );
 
     if ($billing_city) {
@@ -107,7 +111,7 @@ function avaita_add_billing_fields($fields)
         $response = $avaita_local_shipping_db->get_all_areas($billing_city);
         if ($response) {
             $areas = array(
-                '' => 'Select the area'
+                '' => __('Select your Area', 'avaita'),
             );
 
             foreach ($response as $row) {
@@ -125,7 +129,7 @@ function avaita_add_billing_fields($fields)
         'avaita_billing_city' => array(
             'type' => 'select',
             'id' => 'avaita-billing-city',
-            'default' => urlencode($billing_city),
+            'default' => $billing_city ? urlencode($billing_city) : '',
             'options' => $cities,
             'required' => true,
             'label' => __('Select Your City', 'avaita'),
@@ -138,6 +142,26 @@ function avaita_add_billing_fields($fields)
             'class' => 'avaita-address-finder-wrapper',
             'required' => true,
             'label' => __('Select Your Area', 'avaita'),
+            'custom_attributes' => array(
+                'data-reset_option' => esc_html(json_encode($areas)),
+                'data-first_option' => esc_html(json_encode(array(
+                    '' => __('Select Your Area', 'avaita'),
+                ))),
+            ),
+        ),
+        'avaita_billing_subarea' => array(
+            'type' => 'select',
+            'id' => 'avaita-billing-subarea',
+            'options' => $subareas,
+            'class' => 'avaita-address-finder-wrapper',
+            'required' => true,
+            'label' => __('Select Your Sub Area', 'avaita'),
+            'custom_attributes' => array(
+                'data-reset_option' => esc_html(json_encode($subareas)),
+                'data-first_option' => esc_html(json_encode(array(
+                    __('Select Your Sub Area', 'avaita'),
+                ))),
+            ),
         ),
         // 'avaita_shipping_city' => array(
         //     'type' => 'select',
@@ -159,11 +183,15 @@ function avaita_add_billing_fields($fields)
     );
 
     if (count($new_fields['avaita_billing_area']['options']) <= 1) {
-        $new_fields['avaita_billing_area']['custom_attributes'] = array('disabled' => 'disabled');
+        $new_fields['avaita_billing_area']['custom_attributes']['disabled'] = 'disabled';
+    }
+
+    if (count($new_fields['avaita_billing_subarea']['options']) <= 1) {
+        $new_fields['avaita_billing_subarea']['custom_attributes']['disabled'] = 'disabled';
     }
 
     $fields['billing_city']['type'] = 'hidden';
-    $fields['billing_city']['default'] = urldecode($billing_city);
+    $fields['billing_city']['default'] = $billing_city? urldecode($billing_city) : '';
 
     $fields['billing_address_1']['type'] = 'hidden';
     $fields['billing_address_1']['default'] = urldecode($billing_area);

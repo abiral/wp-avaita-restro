@@ -58,6 +58,17 @@ class Avaita_Local_Shipping_Database
         return $response;
     }
 
+    function get_all_subareas($city, $area)
+    {
+        global $wpdb;
+        $city = urldecode($city);
+        $area = urldecode($area);
+
+        $response = $wpdb->get_results('SELECT subarea FROM ' . $this->table . ' WHERE city = "' . $city . '" AND area = "' . $area . '"');
+        return $response;
+    }
+    
+
     function get_shipping_charge_for_area($city, $area)
     {
         global $wpdb;
@@ -65,6 +76,18 @@ class Avaita_Local_Shipping_Database
         $area = urldecode($area);
 
         $response = $wpdb->get_row('SELECT * FROM ' . $this->table . ' WHERE city = "' . $city . '" AND area = "' . $area . '"');
+        
+        return $response ? $response : null;
+    }
+
+    function get_shipping_charge_for_subarea($city, $area, $subarea)
+    {
+        global $wpdb;
+        $city = urldecode($city);
+        $area = urldecode($area);
+        $subarea = urldecode($subarea);
+
+        $response = $wpdb->get_row('SELECT * FROM ' . $this->table . ' WHERE city = "' . $city . '" AND area = "' . $area . '" AND subarea="'.$subarea.'"');
         
         return $response ? $response : null;
     }

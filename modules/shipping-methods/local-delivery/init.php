@@ -30,23 +30,24 @@ function avaita_local_shipping_admin_scripts()
         //     'ajaxUrl' => admin_url('admin-ajax.php'),
         //     'nonce' => wp_create_nonce('order-item')
         // ));
-        wp_enqueue_style('avaita-local-shipping-admin', plugins_url('assets/css/admin-local-delivery.css', __FILE__), array(), '1.0.0');
+        wp_enqueue_style('avaita-local-shipping-admin', plugins_url('assets/css/admin-local-delivery.css', __FILE__), array(), AVAITA_RESTRO_VERSION);
     }
 }
 
 
-add_action('woocommerce_checkout_update_order_review', 'avaita_process_order_data_for_shipping');
-function avaita_process_order_data_for_shipping()
-{
+// add_action('woocommerce_checkout_update_order_review', 'avaita_process_order_data_for_shipping');
+// function avaita_process_order_data_for_shipping()
+// {
 
-    $city = WC()->session->get('avaita_billing_city');
-    $area = WC()->session->get('avaita_billing_area');
+//     $city = WC()->session->get('avaita_billing_city');
+//     $area = WC()->session->get('avaita_billing_area');
+//     $subarea = WC()->session->get('avaita_billing_subarea');
 
-    $packages = WC()->cart->get_shipping_packages();
-    foreach ($packages as $package_key => $package) {
-        WC()->session->set('shipping_for_package_' . $package_key, false);
-    }
-}
+//     $packages = WC()->cart->get_shipping_packages();
+//     foreach ($packages as $package_key => $package) {
+//         WC()->session->set('shipping_for_package_' . $package_key, false);
+//     }
+// }
 
 add_action('woocommerce_checkout_update_order_review', 'avaita_update_shipping_session');
 function avaita_update_shipping_session($postdata)
@@ -56,6 +57,7 @@ function avaita_update_shipping_session($postdata)
     $form_data = null;
     $city = '';
     $area = '';
+    $subarea = '';
     parse_str($postdata, $form_data);
 
     if (!empty($form_data['avaita_billing_city'])) {
@@ -66,23 +68,27 @@ function avaita_update_shipping_session($postdata)
         $area = $form_data['avaita_billing_area'];
     }
 
-    if (!$area && $city) {
+    if (!empty($form_data['avaita_billing_subarea'])) {
+        $subarea = $form_data['avaita_billing_subarea'];
+    }
+
+    if (!($subarea && $area && $city)) {
         return;
     }
 
-    $area_charge = $avaita_local_shipping_db->get_shipping_charge_for_area($city, $area);
+    $subarea_charge = $avaita_local_shipping_db->get_shipping_charge_for_subarea($city, $area, $subarea);
 
-    if (!$area_charge) {
+    if (!$subarea_charge) {
         return;
     }
 
     WC()->session->set('avaita_billing_city', $city);
     WC()->session->set('avaita_billing_area', $area);
 
-    $delivery_price = $area_charge->delivery_price;
-    $minimum_order_threshold = $area_charge->minimum_order_threshold;
-    $minimum_free_deliery = $area_charge->minimum_free_delivery;
-    $formatted_address = implode(', ', [$area_charge->area, $area_charge->city]);
+    $delivery_price = $subarea_charge->delivery_price;
+    $minimum_order_threshold = $subarea_charge->minimum_order_threshold;
+    $minimum_free_deliery = $subarea_charge->minimum_free_delivery;
+    $formatted_address = implode(', ', [$subarea_charge->area, $subarea_charge->city]);
 
     if ($delivery_price) {
         WC()->session->set('avaita_delivery_price', $delivery_price);

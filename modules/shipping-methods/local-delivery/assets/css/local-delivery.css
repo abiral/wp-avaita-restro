@@ -77,8 +77,8 @@
     border-radius: 50%;
     position: absolute;
     animation: avaita-address-finder-rotate 1s linear infinite;
-    top: 32px;
-    right: 5px;
+    top: 62px;
+    right: 14px;
 }
 .avaita-address-finder-wrapper.loading .spinner::before {
     content: "";

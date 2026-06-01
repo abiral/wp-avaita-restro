@@ -5,8 +5,8 @@ class Avaita_Local_Shipping_Method extends WC_Shipping_Method
     {
         $this->id = 'avaita_local_shipping_method';
         $this->instance_id        = absint($instance_id);
-        $this->method_title = esc_html__('Local Shipping', 'avaita');
-        $this->method_description = esc_html__('Local WooCommerce Shipping', 'avaita');
+        $this->method_title = esc_html__('Local Shipping', 'avaita-restro');
+        $this->method_description = esc_html__('Local WooCommerce Shipping', 'avaita-restro');
         $this->init();
     }
 
@@ -15,57 +15,73 @@ class Avaita_Local_Shipping_Method extends WC_Shipping_Method
         $this->init_settings();
         $this->init_form_fields();
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
+        add_action( 'woocommerce_cart_calculate_fees', array($this, 'add_custom_extra_fee') );
     }
 
     public function init_form_fields()
     {
         $form_fields = array(
             'enabled' => array(
-                'title'   => esc_html__('Enable/Disable', 'avaita'),
+                'title'   => esc_html__('Enable/Disable', 'avaita-restro'),
                 'type'    => 'checkbox',
-                'label'   => esc_html__('Enable this shipping method', 'avaita'),
+                'label'   => esc_html__('Enable this shipping method', 'avaita-restro'),
             ),
             'title' => array(
-                'title'       => esc_html__('Method Title', 'avaita'),
+                'title'       => esc_html__('Method Title', 'avaita-restro'),
                 'type'        => 'text',
-                'description' => esc_html__('Enter the method title', 'avaita'),
-                'default'     => esc_html__('Local Delivery', 'avaita'),
+                'description' => esc_html__('Enter the method title', 'avaita-restro'),
+                'default'     => esc_html__('Local Delivery', 'avaita-restro'),
             ),
             'description' => array(
-                'title'       => esc_html__('Description', 'avaita'),
+                'title'       => esc_html__('Description', 'avaita-restro'),
                 'type'        => 'textarea',
-                'description' => esc_html__('Enter the Description', 'avaita'),
+                'description' => esc_html__('Enter the Description', 'avaita-restro'),
             ),
         );
         $this->form_fields = $form_fields;
+    }
+
+    
+    function add_custom_extra_fee( $cart ) {
+        if ( is_admin() && ! defined( 'DOING_AJAX' ) ) return;
+        $small_order_fee = WC()->session->get('avaita_small_order_fee');
+        if ($small_order_fee && $small_order_fee > 0) {
+            WC()->cart->add_fee(__('Small Order Fee', 'avaita-restro'), $small_order_fee, false );
+        }   
     }
 
     public function calculate_shipping($package = array())
     {
         $city = WC()->session->get('avaita_billing_city');
         $area = WC()->session->get('avaita_billing_area');
+        $sub_area = WC()->session->get('avaita_billing_sub_area');
+        $street = WC()->session->get('avaita_billing_street');
 
-        if ($city && $area) {
+        if ($city && $area && $sub_area && $street) {
+            $delivery_address = urldecode(WC()->session->get('avaita_formatted_address'));
             $delivery_price = WC()->session->get('avaita_delivery_price');
-            $address = WC()->session->get('avaita_formatted_address');
-
             $cart_total = WC()->cart->get_cart_contents_total();
 
-            // $order_threshold = WC()->session->get('avaita_minimum_order_threshold');
             $free_threshold = WC()->session->get('avaita_minimum_free_deliery');
+            $small_order_fee = WC()->session->get('avaita_small_order_fee');
 
-            $label = $this->settings['title'];
+
+            $label = __('Standard Delivery', 'avaita-restro');
 
             if ($cart_total > $free_threshold) {
-                $label = __('Free', 'avaita');
+                $label = __('Free Delivery', 'avaita-restro');
                 $delivery_price = 0;
             }
 
+
             $this->add_rate(array(
                 'id'     => $this->id,
-                'label'  => $label,
+                'label'  => $label,  //. ' ' . __('to', 'avaita-restro') . ' ' . $delivery_address,
                 'cost'   => $delivery_price,
-                'meta_data' => array('avaita_minimum_free_deliery' => $free_threshold)
+                // 'meta_data' => array(
+                //     'avaita_minimum_free_deliery' => $free_threshold,
+                //     'avaita_delivery_address' => $delivery_address
+                // )
             ));
         }
     }
@@ -87,17 +103,6 @@ class Avaita_Local_Shipping_Method extends WC_Shipping_Method
 //     return $fields;
 // }
 
-
-// function vitamin_get_delivery_area_field()
-// {
-//     return array(
-//         'type' => 'select',
-//         'default' => 'Sukhanagar',
-//         'required' => true,
-//         'label' => __('Delivery Area', 'vitamin'),
-//         'options' => vitamin_get_delivery_areas(),
-//     );
-// }
 
 // function vitamin_get_delivery_areas()
 // {
@@ -398,21 +403,4 @@ class Avaita_Local_Shipping_Method extends WC_Shipping_Method
 
 //         WC()->cart->add_fee(__('Delivery Charge', 'vitamin'), $delivery_charge);
 //     }
-// }
-
-
-
-// add_filter('woocommerce_admin_billing_fields', 'vitamin_add_admin_billing_fields');
-// function vitamin_add_admin_billing_fields($fields)
-// {
-//     $fields['billing_delivery_area'] = array(
-//         'type' => 'select',
-//         'default' => 'Sukhanagar',
-//         'required' => true,
-//         'label' => __('Delivery Area', 'vitamin'),
-//         'options' => vitamin_get_delivery_areas(),
-//         'show'  => true,
-//     );
-
-//     return $fields;
 // }

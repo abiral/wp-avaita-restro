@@ -47,12 +47,49 @@ class Ava_Restro_Admin {
 
     function register_settings_page() {
         add_menu_page(
-            __('Avaita Restro', 'avaita-restro'), 
-            __('Avaita Restro', 'avaita-restro'), 
-            'manage_options', 
-            $this->page_param['page'], 
+            __('Avaita Restro', 'avaita-restro'),
+            __('Avaita Restro', 'avaita-restro'),
+            'manage_options',
+            $this->page_param['page'],
+            array($this, 'render_settings_page_content'),
+            $this->get_menu_icon()
+        );
+
+        // Surface the delivery areas screen as an explicit submenu. A DISTINCT
+        // slug is used (not the parent slug) so WordPress keeps both the auto
+        // parent link and this item — a lone submenu sharing the parent slug is
+        // not surfaced (see add_submenu_page(): the auto parent link is only
+        // added when $menu_slug !== $parent_slug). The asset enqueue in
+        // order-address-fields.php matches this slug too.
+        add_submenu_page(
+            $this->page_param['page'],
+            __('Delivery Areas', 'avaita-restro'),
+            __('Delivery Areas', 'avaita-restro'),
+            'manage_options',
+            'ava-restro-delivery-areas',
             array($this, 'render_settings_page_content')
         );
+
+        // Drop the auto-generated first submenu item that duplicates the parent
+        // ("Avaita Restro"), leaving just "Delivery Areas". The top-level link
+        // then falls through to the remaining submenu page.
+        remove_submenu_page($this->page_param['page'], $this->page_param['page']);
+    }
+
+    /**
+     * Custom menu icon. Returns the bundled restro.svg as a base64 data URI so
+     * it renders at the standard 20px menu-icon size (like a dashicon); falls
+     * back to a built-in dashicon if the file is missing.
+     */
+    private function get_menu_icon() {
+        $icon_path = __DIR__ . '/../../assets/icons/restro.svg';
+        if (is_readable($icon_path)) {
+            $svg = file_get_contents($icon_path);
+            if ($svg !== false) {
+                return 'data:image/svg+xml;base64,' . base64_encode($svg);
+            }
+        }
+        return 'dashicons-store';
     }
 
     // function initialize_settings_page() {

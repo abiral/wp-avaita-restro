@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(gh pr *)",
+      "PowerShell(Write-Output $env:TEMP)",
+      "Bash(gh pr *)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git switch:*)",
+      "Bash(git commit:*)",
+      "Bash(php -l class/gallery.php)",
+      "Bash(php -l fansee-blocks-pro.php)",
+      "Bash(npx wp-env *)",
+      "Bash(npx playwright *)",
+      "Bash(grep -E '\\\\+?[0-9][0-9 \\\\-\\(\\).]{7,}')",
+      "Bash(grep -E '<style>\\\\{`')",
+      "Bash(grep -E '[+]?[0-9][- 0-9\\(\\).]{7,}')",
+      "Bash(awk '{ print NR\": [\"$0\"]\" }' .gitignore)",
+      "Bash(git -C D:/projects/wp-plugins/fansee-blocks check-ignore -v reference/gallery/)",
+      "Bash(git -C D:/projects/wp-plugins/fansee-blocks log --oneline --all -- \"reference/card/index.html\")",
+      "Bash(git -C D:/projects/wp-plugins/fansee-blocks ls-files reference/card/)",
+      "Bash(grep *)",
+      "Bash(python3 -c \"print\\(len\\('Process or workflow steps shown as a row of cards with numbered badges, titles, and short descriptions. One step can be highlighted as the accent.'\\)\\)\")",
+      "Bash(git -C D:/projects/wp-plugins/fansee-blocks ls-files docs/)",
+      "Bash(git -C D:/projects/wp-plugins/fansee-blocks ls-files tests/)",
+      "Bash(git -C D:/projects/wp-plugins/fansee-blocks ls-files src/)",
+      "Bash(git -C D:/projects/wp-plugins/fansee-blocks ls-files --error-unmatch reference/card/index.html)",
+      "Bash(git -C D:/projects/wp-plugins/fansee-blocks ls-files .claude/)",
+      "Bash(git *)",
+      "Bash(php -l class/step-card.php)",
+      "Bash(awk 'NR==34 || NR==38 {print NR\": \"$0}' .gitignore)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(command -v php)",
+      "Bash(php -l class/modal.php)",
+      "Bash(node *)",
+      "Bash(xargs -r git add)"
+    ]
+  }
+}

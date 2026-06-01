@@ -5,7 +5,7 @@
  * Description: A plugin that creates a site as a server to POS
  * Author: Avaita Softwares
  * Author URI: https://avaitasoftwares.biz
- * Version: 1.1
+ * Version: 1.2
  * Plugin URI: https://avaitasoftwares.biz
  */
 

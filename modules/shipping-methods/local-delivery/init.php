@@ -320,10 +320,25 @@ function avaita_add_order_shipping() {
         // Add new shipping.
         $item = new WC_Order_Item_Shipping();
         $area_name = $_POST['street'] . ', '. $_POST['subArea'] . ', '. $_POST['area'] . ', ' . $_POST['city'];
+
+        $base_price     = isset($_POST['delivery_price']) ? floatval($_POST['delivery_price']) : 0;
+        $free_threshold = isset($_POST['minimum_free_delivery']) ? floatval($_POST['minimum_free_delivery']) : 0;
+
+        // Apply the free-delivery rule up front against the current items subtotal.
+        $items_total = 0;
+        foreach ($order->get_items('line_item') as $line_item) {
+            $items_total += (float) $line_item->get_total();
+        }
+        $cost = ($free_threshold && $items_total >= $free_threshold) ? 0 : $base_price;
+
         $item->set_name( sprintf(__("Deliver to %s", "woocommerce"), $area_name));
-        $item->set_total($_POST['delivery_price']);
+        $item->set_total($cost);
+        // Hidden meta (underscore-prefixed) so the recalculate hook can re-apply
+        // the free-delivery rule when the order total later changes.
+        $item->add_meta_data('_avaita_base_delivery_price', $base_price, true);
+        $item->add_meta_data('_avaita_free_threshold', $free_threshold, true);
         $item->set_order_id( $order_id );
-        
+
         $item_id = $item->save();
 
         ob_start();
@@ -335,6 +350,59 @@ function avaita_add_order_shipping() {
 
     // wp_send_json_success must be outside the try block not to break phpunit tests.
     wp_send_json_success( $response );
+}
+
+/**
+ * Re-apply the free-delivery rule to the admin-added delivery shipping line
+ * whenever an order's totals are recalculated (e.g. the "Recalculate" button or
+ * saving order items). If the products subtotal reaches the free threshold the
+ * delivery line is set to 0; otherwise it is restored to its base price.
+ *
+ * Only acts on shipping lines that carry the _avaita_free_threshold meta, so it
+ * never touches rates produced by the frontend shipping method.
+ */
+add_action('woocommerce_order_after_calculate_totals', 'avaita_enforce_free_delivery_on_recalc', 20, 2);
+function avaita_enforce_free_delivery_on_recalc($and_taxes, $order)
+{
+    static $running = false;
+
+    if ($running || ! $order instanceof WC_Order) {
+        return;
+    }
+
+    $shipping_items = $order->get_items('shipping');
+    if (empty($shipping_items)) {
+        return;
+    }
+
+    $items_total = 0;
+    foreach ($order->get_items('line_item') as $line_item) {
+        $items_total += (float) $line_item->get_total();
+    }
+
+    $changed = false;
+    foreach ($shipping_items as $item) {
+        $threshold = $item->get_meta('_avaita_free_threshold');
+        if ($threshold === '' || $threshold === null) {
+            continue; // Not an Avaita delivery line.
+        }
+
+        $base_price = (float) $item->get_meta('_avaita_base_delivery_price');
+        $new_cost   = ((float) $threshold > 0 && $items_total >= (float) $threshold) ? 0.0 : $base_price;
+
+        if ((float) $item->get_total() !== $new_cost) {
+            $item->set_total($new_cost);
+            $item->set_taxes(array());
+            $item->save();
+            $changed = true;
+        }
+    }
+
+    if ($changed) {
+        $running = true;
+        $order->calculate_totals(false);
+        $running = false;
+    }
 }
 
 add_action('woocommerce_cart_totals_after_shipping', 'show_delivery_address_in_cart', 1);

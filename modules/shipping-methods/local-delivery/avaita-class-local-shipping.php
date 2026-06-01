@@ -68,7 +68,7 @@ class Avaita_Local_Shipping_Method extends WC_Shipping_Method
 
             $label = __('Standard Delivery', 'avaita-restro');
 
-            if ($cart_total > $free_threshold) {
+            if ($free_threshold && $cart_total >= $free_threshold) {
                 $label = __('Free Delivery', 'avaita-restro');
                 $delivery_price = 0;
             }

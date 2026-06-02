@@ -147,7 +147,7 @@ class Avaita_Local_Shipping_Database
 
         $args = wp_parse_args($args, [
             'city' => '', 'area' => '', 'sub_area' => '', 'street' => '',
-            'orderby' => '', 'order' => 'desc', 'page' => 1,
+            'search' => '', 'orderby' => '', 'order' => 'desc', 'page' => 1,
         ]);
 
         $limit  = 20;
@@ -163,6 +163,14 @@ class Avaita_Local_Shipping_Database
                 $params[] = $args[$col];
             }
         }
+
+        // --- Free-text search: partial (LIKE) match across the text columns ---
+        if (trim((string) $args['search']) !== '') {
+            $like = '%' . $wpdb->esc_like(trim($args['search'])) . '%';
+            $where[] = '(area LIKE %s OR sub_area LIKE %s OR street LIKE %s OR city LIKE %s)';
+            array_push($params, $like, $like, $like, $like);
+        }
+
         $where_sql = $where ? ' WHERE ' . implode(' AND ', $where) : '';
 
         // --- Sort: whitelist column + direction (cannot be parameterized) ---

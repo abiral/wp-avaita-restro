@@ -8,6 +8,7 @@ $query_args   = array();
 $f_city     = isset($_GET['f_city'])     ? sanitize_text_field(wp_unslash($_GET['f_city']))     : '';
 $f_area     = isset($_GET['f_area'])     ? sanitize_text_field(wp_unslash($_GET['f_area']))     : '';
 $f_sub_area = isset($_GET['f_sub_area']) ? sanitize_text_field(wp_unslash($_GET['f_sub_area'])) : '';
+$search     = isset($_GET['search_query']) ? sanitize_text_field(wp_unslash($_GET['search_query'])) : '';
 $orderby    = isset($_GET['orderby'])    ? sanitize_key($_GET['orderby'])                       : '';
 $order      = (isset($_GET['order']) && strtolower($_GET['order']) === 'asc') ? 'asc' : 'desc';
 
@@ -19,10 +20,10 @@ if ($f_area && !in_array($f_area, wp_list_pluck($areas, 'area'), true)) { $f_are
 $sub_areas = ($f_city && $f_area) ? $avaita_local_shipping_db->get_all_sub_areas($f_city, $f_area)['data'] : [];
 if ($f_sub_area && !in_array($f_sub_area, wp_list_pluck($sub_areas, 'sub_area'), true)) { $f_sub_area = ''; }
 
-$has_filters = ($f_city || $f_area || $f_sub_area);
+$has_filters = ($f_city || $f_area || $f_sub_area || $search !== '');
 
 $delivery_data = $avaita_local_shipping_db->get_delivery_data([
-    'city' => $f_city, 'area' => $f_area, 'sub_area' => $f_sub_area,
+    'city' => $f_city, 'area' => $f_area, 'sub_area' => $f_sub_area, 'search' => $search,
     'orderby' => $orderby, 'order' => $order, 'page' => $page_number,
 ]);
 
@@ -30,7 +31,7 @@ if ($page) {
     $query_args['page'] = $page;
 }
 
-foreach (['f_city' => $f_city, 'f_area' => $f_area, 'f_sub_area' => $f_sub_area] as $k => $v) {
+foreach (['f_city' => $f_city, 'f_area' => $f_area, 'f_sub_area' => $f_sub_area, 'search_query' => $search] as $k => $v) {
     if ($v !== '') { $query_args[$k] = $v; }
 }
 if ($orderby) {
@@ -146,6 +147,14 @@ $info_tip = function ($text) {
         gap: 6px;
         align-items: center;
         flex-wrap: wrap;
+    }
+    .avaita-delivery-wrap .avaita-filter-search {
+        min-width: 200px;
+        border-color: var(--ava-primary-border);
+    }
+    .avaita-delivery-wrap .avaita-filter-search:focus {
+        border-color: var(--ava-primary);
+        box-shadow: 0 0 0 1px var(--ava-primary);
     }
     .avaita-delivery-wrap .avaita-filter-select {
         min-width: 150px;
@@ -750,6 +759,7 @@ $info_tip = function ($text) {
         }
         .avaita-delivery-wrap .avaita-bulk-actions .button { flex: 1; justify-content: center; }
         .avaita-delivery-wrap .avaita-filter-form { width: 100%; }
+        .avaita-delivery-wrap .avaita-filter-search { min-width: 0; flex: 1 1 100%; }
         .avaita-delivery-wrap .avaita-filter-select {
             min-width: 0;
             max-width: none;
@@ -791,6 +801,7 @@ $info_tip = function ($text) {
                         <input type="hidden" name="orderby" value="<?php echo esc_attr($orderby); ?>" />
                         <input type="hidden" name="order" value="<?php echo esc_attr($order); ?>" />
                     <?php endif; ?>
+                    <input type="search" name="search_query" class="avaita-filter-search" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search area, street, city…', 'avaita-restro'); ?>" />
                     <select name="f_city" id="avaita-filter-city" class="avaita-filter-select">
                         <option value=""><?php esc_html_e('All Cities', 'avaita-restro'); ?></option>
                         <?php foreach ($cities as $c): ?>

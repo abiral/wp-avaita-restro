@@ -4,6 +4,31 @@ $page_number  = isset($_GET['page_number']) && $_GET['page_number'] ? absint($_G
 $page         = isset($_GET['page']) && $_GET['page'] ? sanitize_text_field($_GET['page']) : 'ava-restro';
 $query_args   = array();
 
+if (!function_exists('avaita_highlight_match')) {
+    /**
+     * Escape $text for HTML, then wrap any occurrences of the search term
+     * word(s) in <mark> for visual highlighting in the results table.
+     */
+    function avaita_highlight_match($text, $search_query) {
+        $text = (string) $text;
+        if (trim((string) $search_query) === '' || $text === '') {
+            return esc_html($text);
+        }
+        $escaped = esc_html($text); // escape FIRST, then inject our own markup
+        $terms = preg_split('/\s+/', trim($search_query), -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($terms as $term) {
+            $term = esc_html($term); // match against the already-escaped text
+            if ($term === '') { continue; }
+            $escaped = preg_replace(
+                '/(' . preg_quote($term, '/') . ')/iu',
+                '<mark class="avaita-hl">$1</mark>',
+                $escaped
+            );
+        }
+        return $escaped;
+    }
+}
+
 // --- Filter (cascading) + sort params ---
 $f_city     = isset($_GET['f_city'])     ? sanitize_text_field(wp_unslash($_GET['f_city']))     : '';
 $f_area     = isset($_GET['f_area'])     ? sanitize_text_field(wp_unslash($_GET['f_area']))     : '';
@@ -627,6 +652,13 @@ $info_tip = function ($text) {
     }
 
     .avaita-delivery-table .muted { color: #9ca3af; }
+    .avaita-delivery-table .avaita-hl {
+        background: var(--ava-accent-soft, #fef3c7);  /* soft amber */
+        color: #92400e;                               /* amber-900 text */
+        padding: 0;
+        border-radius: 3px;
+        font-weight: 600;
+    }
 
     .avaita-delivery-table .state-badge {
         display: inline-block;
@@ -960,10 +992,10 @@ $info_tip = function ($text) {
                 <?php if ($delivery_data && $delivery_data['total']): ?>
                     <?php foreach ($delivery_data['data'] as $data): ?>
                         <tr data-location-id="<?php echo esc_attr($data->id); ?>" data-remove-message="<?php echo esc_attr(sprintf(__('You are about to delete delivery data for %s area', 'avaita-restro'), $data->area)); ?>">
-                            <td class="area" data-val="<?php echo esc_attr($data->area); ?>"><strong><?php echo esc_html($data->area); ?></strong></td>
-                            <td class="sub-area" data-val="<?php echo esc_attr($data->sub_area); ?>"><?php echo $data->sub_area ? esc_html($data->sub_area) : '<span class="muted">—</span>'; ?></td>
-                            <td class="street" data-val="<?php echo esc_attr($data->street); ?>"><?php echo $data->street ? esc_html($data->street) : '<span class="muted">—</span>'; ?></td>
-                            <td class="city" data-val="<?php echo esc_attr($data->city); ?>"><?php echo esc_html($data->city); ?></td>
+                            <td class="area" data-val="<?php echo esc_attr($data->area); ?>"><strong><?php echo avaita_highlight_match($data->area, $search); ?></strong></td>
+                            <td class="sub-area" data-val="<?php echo esc_attr($data->sub_area); ?>"><?php echo $data->sub_area ? avaita_highlight_match($data->sub_area, $search) : '<span class="muted">—</span>'; ?></td>
+                            <td class="street" data-val="<?php echo esc_attr($data->street); ?>"><?php echo $data->street ? avaita_highlight_match($data->street, $search) : '<span class="muted">—</span>'; ?></td>
+                            <td class="city" data-val="<?php echo esc_attr($data->city); ?>"><?php echo avaita_highlight_match($data->city, $search); ?></td>
                             <td class="state col-state" data-val="<?php echo esc_attr($data->state); ?>"><span class="state-badge"><?php echo esc_html($data->state); ?></span></td>
                             <td class="distance col-num" data-val="<?php echo esc_attr($data->distance); ?>"><?php echo $data->distance ? esc_html($data->distance) . ' km' : '<span class="muted">N/A</span>'; ?></td>
                             <td class="min-threshold col-num" data-val="<?php echo esc_attr($data->minimum_order_threshold); ?>"><?php echo $data->minimum_order_threshold ? wc_price($data->minimum_order_threshold) : '<span class="muted">—</span>'; ?></td>
